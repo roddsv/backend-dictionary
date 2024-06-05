@@ -28,7 +28,7 @@ router.post('/login', (req: Request, res: Response) => {
         console.log(userSenha)
 
         if (email == userEmail && senha == userSenha) {
-            res.send(await LoginController(body))
+            res.send(Login.Login(req.body))
         } else {
             res.send('sem login')
         }
