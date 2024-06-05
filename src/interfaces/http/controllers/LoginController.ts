@@ -1,5 +1,5 @@
 import { Response, response } from "express";
-import { User } from "../../../infrastructure/database/User";
+import { User } from "../../../infrastructure/database/models/User";
 import { Sequelize } from "sequelize";
 const jsonwebtoken = require('json-web-token')
 

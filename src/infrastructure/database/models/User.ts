@@ -1,5 +1,6 @@
-import { Sequelize, DataTypes } from "sequelize"
-import { connection } from "./db"
+const Sequelize = require("sequelize")
+import { DataTypes } from "sequelize"
+import { connection } from "../db"
 
 export const User = connection.define('users', {
     email:{
@@ -7,7 +8,7 @@ export const User = connection.define('users', {
         allowNull: false
     },
     senha:{
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         allowNull: false
     },
     createdAt:{
@@ -20,3 +21,7 @@ export const User = connection.define('users', {
     }
 })
 
+
+User.sync({force: false}).then(() => {})
+
+module.exports = User
