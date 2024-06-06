@@ -14,6 +14,7 @@ const port: Number = 3001
 const index = require('./main/routes/index')
 
 const userModel = require('./infrastructure/database/models/User')
+const wordModel = require('./infrastructure/database/models/Word')
 
 //DB connection
 connection

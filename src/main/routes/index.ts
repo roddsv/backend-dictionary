@@ -3,6 +3,7 @@ import { Signout } from "../../interfaces/http/controllers/SignoutController";
 import axios from "axios";
 
 const User = require("../../infrastructure/database/models/User");
+const Word = require("../../infrastructure/database/models/Word");
 
 const express = require("express");
 const app = express();
@@ -30,7 +31,7 @@ router.get("/wordsearch", (req: Request, res: Response) => {
   res.render("wordsearch");
 });
 
-router.get("/entries/en", (req: Request, res: Response) => {
+router.get("/entries/en/:word", (req: Request, res: Response) => {
     const getWords = async function (word: string) {
         const API_URL: string = `https://api.dictionaryapi.dev/api/v2/entries/en`
         await axios
@@ -40,8 +41,24 @@ router.get("/entries/en", (req: Request, res: Response) => {
         })
     };
 
+    const saveWords = async function(word: string) {
+        Word.create({
+            id: uuidv4(),
+            name: word,
+            user_id: req.cookies.User_Id,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }).then((word: any) => {
+            console.log(
+                word.id    
+            );
+
+          });
+    }
+
     const word = req.query.word as string;
     getWords(word);
+    saveWords(word)
 });
 
 router.post("/auth/signup", (req: Request, res: Response) => {
@@ -69,31 +86,33 @@ router.post("/auth/signin", (req: Request, res: Response) => {
   const senha = req.body.password;
 
   User.findAll().then((user: any) => {
-    let userEmail = user[0].email.replace(/\n/g, "");
-    let userSenha = user[0].senha;
+    let userEmail = user[0].email.replace(/\n/g, "")
+    let userSenha = user[0].senha
+    let userId = user[0].id
 
     async function Signin(body: {
-      id: Number;
+      id: string;
       email: string;
       password: string;
     }) {
       const email = body.email;
       const password = body.password;
-      const id = body.id;
 
       const token = await jsonwebtoken.sign(
         {
-          id: id,
+          id: userId,
           email: email,
           password: password,
         },
         "jwtGeradoComSucesso"
       );
 
-      res.cookie("Token", token);
+      res.cookie("Token", token)
+      res.cookie("User_Id", userId)
+
       res.send({
-        id: id,
-        name: "User 1",
+        id: userId,
+        name: user[0].name ? user[0].name : "User 1",
         token: `Bearer ${token}`,
       });
     }
