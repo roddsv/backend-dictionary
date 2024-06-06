@@ -5,6 +5,7 @@ const User = require('../../infrastructure/database/models/User')
 
 const jsonwebtoken = require('jsonwebtoken')
 const express = require('express')
+const { v4: uuidv4 } = require('uuid')
 const app = express() 
 
 const router = express.Router()
@@ -19,6 +20,34 @@ router.get('/login', (req: Request, res: Response) => {
     res.render('login')
 })
 
+router.get('/register', (req: Request, res: Response) => {
+    res.render('signup')
+})
+
+router.post('/auth/signup', (req: Request, res: Response) => {
+    
+    const email = req.body.email
+    const name = req.body.name
+    const senha = req.body.password
+
+    User.create({
+        id: uuidv4(),
+        name: name,
+        email: email,
+        senha: senha,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    }).then((user:  any) => {
+        res.send(
+            {
+                id: user.id,
+                name: user.name
+            }
+        )
+    })
+});
+
+    
 router.post('/auth/signin', (req: Request, res: Response) => {
     
     const email = req.body.email
