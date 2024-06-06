@@ -13,41 +13,12 @@
         <h2>Dados da Palavra Pesquisada</h2>
         <textarea rows="100" cols="175" readonly><%= JSON.stringify(data, null, 2) %></textarea>
 
-        <h2>Palavras Favoritas</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Palavra</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% words.forEach(word => { %>
-                <tr>
-                    <td><%= word %></td>
-                    <td>
-                        <form action="/remove-word" method="POST" style="display:inline;">
-                            <input type="hidden" name="wordToRemove" value="<%= word %>">
-                            <button type="submit">Remover</button>
-                        </form>
-                    </td>
-                </tr>
-                <% }); %>
-            </tbody>
-            <tbody>
-                <tr>
-                    
-                    <td>
-                        <form action="/remove-word" method="POST" style="display:inline;">
-                            
-                            <button type="submit" class="btn-danger">Remover</button>
-                        </form>
-                    </td>
-                </tr>
-                
-            </tbody>
-        </table>
 
+        <form action="/wordsearch" method="GET">
+            <div class="form-group">
+                <button type="submit">Buscar Palavras</button>
+            </div>
+        </form>
         <form action="/new-favorite" method="POST">
             <div class="form-group">
                 <input type="text" name="newWord" placeholder="Nova Palavra" required>
