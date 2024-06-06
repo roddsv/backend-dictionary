@@ -7,6 +7,10 @@ export const User = connection.define('users', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    name:{
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     senha:{
         type: DataTypes.STRING,
         allowNull: false
