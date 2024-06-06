@@ -9,11 +9,17 @@ const app = express()
 
 const router = express.Router()
 
-router.get('/', (req: Request, res: Response) => { 
+router.get('/', (req: Request, res: Response) => {
+    res.send({
+        message: "Fullstack Challenge 🏅 - Dictionary"
+    })
+})
+
+router.get('/login', (req: Request, res: Response) => {
     res.render('login')
 })
 
-router.post('/signin', (req: Request, res: Response) => {
+router.post('/auth/signin', (req: Request, res: Response) => {
     
     const email = req.body.email
     const senha = req.body.password
@@ -34,7 +40,14 @@ router.post('/signin', (req: Request, res: Response) => {
             }, 'jwtGeradoComSucesso')
 
             res.cookie('Token', token)
-            res.sendStatus(200)
+            res.send(
+                {
+                    id: id,
+                    name: 'User 1',
+                    token: `Bearer ${token}`
+                }
+            )
+            
         }
         if (email == userEmail && senha == userSenha) { 
             Signin(req.body)
@@ -43,7 +56,7 @@ router.post('/signin', (req: Request, res: Response) => {
         }
     });
 
-    res.render('logged')
+    
 
 })
 
