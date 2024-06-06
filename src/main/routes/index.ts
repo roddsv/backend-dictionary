@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, response } from "express";
 import { Signout } from "../../interfaces/http/controllers/SignoutController";
 import axios from "axios";
+import path from 'path'
 
 const User = require("../../infrastructure/database/models/User");
 const Word = require("../../infrastructure/database/models/Word");
@@ -37,7 +38,12 @@ router.get("/entries/en/:word", (req: Request, res: Response) => {
         await axios
         .get(`${API_URL}/${word}`)
         .then(function (response) {
-            res.send(response.data);
+            res.render('loggedarea', 
+                {
+                    data: response.data,
+                    user: req.cookies.User,
+                }
+            );
         })
     };
 
@@ -48,17 +54,17 @@ router.get("/entries/en/:word", (req: Request, res: Response) => {
             user_id: req.cookies.User_Id,
             createdAt: Date.now(),
             updatedAt: Date.now(),
-          }).then((word: any) => {
+          }).then(() => {
             console.log(
-                word.id    
+                'Palavra salva no banco com sucesso'
             );
-
           });
     }
 
     const word = req.query.word as string;
-    getWords(word);
+    getWords(word)
     saveWords(word)
+
 });
 
 router.post("/auth/signup", (req: Request, res: Response) => {
@@ -97,7 +103,6 @@ router.post("/auth/signin", (req: Request, res: Response) => {
     }) {
       const email = body.email;
       const password = body.password;
-
       const token = await jsonwebtoken.sign(
         {
           id: userId,
@@ -109,12 +114,28 @@ router.post("/auth/signin", (req: Request, res: Response) => {
 
       res.cookie("Token", token)
       res.cookie("User_Id", userId)
+      res.cookie("User", user[0])
+    
+      
+      const words = Word.findAll({
+        where: {
+            user_id: userId
+        }}).then();
+    
+        let arrayWord = []
+        let wordName;
+        for (var i = 0; i < words.length; i++) {
+            wordName = JSON.parse(JSON.stringify(words[i])).name
+            arrayWord.push(wordName)
+        }
 
-      res.send({
-        id: userId,
-        name: user[0].name ? user[0].name : "User 1",
-        token: `Bearer ${token}`,
-      });
+        console.log(arrayWord)
+
+      res.render('loggedarea', {
+        user: user[0],
+        data: 'Nenhuma palavra pesquisada. Pesquise abaixo para carregar os dados aqui.',
+        words: arrayWord
+      })
     }
     if (email == userEmail && senha == userSenha) {
       Signin(req.body);
@@ -127,5 +148,25 @@ router.post("/auth/signin", (req: Request, res: Response) => {
 router.get("/signout", async (req: Request, res: Response) => {
   res.send(await Signout(res));
 });
+
+
+router.post('/new-favorite', async (req: Request, res: Response) => {
+    const newWord = req.body.newWord;
+
+    const saveWords = async function(word: string) {
+        Word.create({
+            id: uuidv4(),
+            name: word,
+            user_id: req.cookies.User_Id,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }).then(() => {
+            console.log(
+                'Palavra salva no banco com sucesso'
+            );
+          });
+    }
+    saveWords(newWord)
+})
 
 module.exports = router;
