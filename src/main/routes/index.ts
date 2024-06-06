@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response, response } from "express";
 import { Signout } from "../../interfaces/http/controllers/SignoutController";
 import axios from "axios";
+import path from 'path'
 
 const User = require("../../infrastructure/database/models/User");
+const Word = require("../../infrastructure/database/models/Word");
 
 const express = require("express");
 const app = express();
@@ -30,18 +32,39 @@ router.get("/wordsearch", (req: Request, res: Response) => {
   res.render("wordsearch");
 });
 
-router.get("/entries/en", (req: Request, res: Response) => {
+router.get("/entries/en/:word", (req: Request, res: Response) => {
     const getWords = async function (word: string) {
         const API_URL: string = `https://api.dictionaryapi.dev/api/v2/entries/en`
         await axios
         .get(`${API_URL}/${word}`)
         .then(function (response) {
-            res.send(response.data);
+            res.render('loggedarea', 
+                {
+                    data: response.data,
+                    user: req.cookies.User,
+                }
+            );
         })
     };
 
+    const saveWords = async function(word: string) {
+        Word.create({
+            id: uuidv4(),
+            name: word,
+            user_id: req.cookies.User_Id,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }).then(() => {
+            console.log(
+                'Palavra salva no banco com sucesso'
+            );
+          });
+    }
+
     const word = req.query.word as string;
-    getWords(word);
+    getWords(word)
+    saveWords(word)
+
 });
 
 router.post("/auth/signup", (req: Request, res: Response) => {
@@ -69,33 +92,50 @@ router.post("/auth/signin", (req: Request, res: Response) => {
   const senha = req.body.password;
 
   User.findAll().then((user: any) => {
-    let userEmail = user[0].email.replace(/\n/g, "");
-    let userSenha = user[0].senha;
+    let userEmail = user[0].email.replace(/\n/g, "")
+    let userSenha = user[0].senha
+    let userId = user[0].id
 
     async function Signin(body: {
-      id: Number;
+      id: string;
       email: string;
       password: string;
     }) {
       const email = body.email;
       const password = body.password;
-      const id = body.id;
-
       const token = await jsonwebtoken.sign(
         {
-          id: id,
+          id: userId,
           email: email,
           password: password,
         },
         "jwtGeradoComSucesso"
       );
 
-      res.cookie("Token", token);
-      res.send({
-        id: id,
-        name: "User 1",
-        token: `Bearer ${token}`,
-      });
+      res.cookie("Token", token)
+      res.cookie("User_Id", userId)
+      res.cookie("User", user[0])
+    
+      
+      const words = Word.findAll({
+        where: {
+            user_id: userId
+        }}).then();
+    
+        let arrayWord = []
+        let wordName;
+        for (var i = 0; i < words.length; i++) {
+            wordName = JSON.parse(JSON.stringify(words[i])).name
+            arrayWord.push(wordName)
+        }
+
+        console.log(arrayWord)
+
+      res.render('loggedarea', {
+        user: user[0],
+        data: 'Nenhuma palavra pesquisada. Pesquise abaixo para carregar os dados aqui.',
+        words: arrayWord
+      })
     }
     if (email == userEmail && senha == userSenha) {
       Signin(req.body);
@@ -108,5 +148,25 @@ router.post("/auth/signin", (req: Request, res: Response) => {
 router.get("/signout", async (req: Request, res: Response) => {
   res.send(await Signout(res));
 });
+
+
+router.post('/new-favorite', async (req: Request, res: Response) => {
+    const newWord = req.body.newWord;
+
+    const saveWords = async function(word: string) {
+        Word.create({
+            id: uuidv4(),
+            name: word,
+            user_id: req.cookies.User_Id,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }).then(() => {
+            console.log(
+                'Palavra salva no banco com sucesso'
+            );
+          });
+    }
+    saveWords(newWord)
+})
 
 module.exports = router;

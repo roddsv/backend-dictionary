@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Usuário</title>
+    <link rel="stylesheet" type="text/css" href="logged.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Dados do Usuário</h2>
+        <textarea rows="10" cols="50" readonly><%= JSON.stringify(user, null, 2) %></textarea>
+        <h2>Dados da Palavra Pesquisada</h2>
+        <textarea rows="100" cols="175" readonly><%= JSON.stringify(data, null, 2) %></textarea>
+
+        <h2>Palavras Favoritas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Palavra</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% words.forEach(word => { %>
+                <tr>
+                    <td><%= word %></td>
+                    <td>
+                        <form action="/remove-word" method="POST" style="display:inline;">
+                            <input type="hidden" name="wordToRemove" value="<%= word %>">
+                            <button type="submit">Remover</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+            <tbody>
+                <tr>
+                    
+                    <td>
+                        <form action="/remove-word" method="POST" style="display:inline;">
+                            
+                            <button type="submit" class="btn-danger">Remover</button>
+                        </form>
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+
+        <form action="/new-favorite" method="POST">
+            <div class="form-group">
+                <input type="text" name="newWord" placeholder="Nova Palavra" required>
+                <button type="submit">Adicionar</button>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>

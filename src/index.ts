@@ -14,6 +14,7 @@ const port: Number = 3001
 const index = require('./main/routes/index')
 
 const userModel = require('./infrastructure/database/models/User')
+const wordModel = require('./infrastructure/database/models/Word')
 
 //DB connection
 connection
@@ -32,8 +33,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.set('view engine', 'ejs')
-app.use(express.static(path.join(__dirname, 'public')))
 app.set('views', path.join(__dirname, '../src/interfaces/views'))
+app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', index)
 
